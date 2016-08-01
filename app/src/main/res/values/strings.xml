@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">GPS_position</string>
+    <string name="new_location">New Location : \n Hours : %1$s \n Provider :  %2$s \n Latitude = %3$s
+        \n Longitude = %4$s \n Altitude = %5$s \n with a precision around %6$s meters
+        \n Speed: %7$s \n Bearing : %8$s </string>
+    <string name="provider_disabled">The provider %s is now disabled</string>
+    <string name="provider_new_status">The provider %1$s has now a new status %2$s</string>
+    <string name="provider_enabled">The provider %s is now enabled</string>
+
+</resources>
