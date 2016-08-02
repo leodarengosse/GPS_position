@@ -51,37 +51,36 @@ public class Satellite extends Service implements GpsStatus.Listener {
     }
 
     @Override
-    public synchronized void onGpsStatusChanged(int event) {
-        Log.d("Satellite", "Sat found");
-
+    public void onGpsStatusChanged(int event) {
         switch (event) {
-            case GpsStatus.GPS_EVENT_STARTED:
-                textSat.setText(strGpsStats);
-                break;
-
-            case GpsStatus.GPS_EVENT_STOPPED:
-                // Do Something with mStatus info
-                textSat.setText(strGpsStats);
-                break;
-
             case GpsStatus.GPS_EVENT_FIRST_FIX:
-                // Do Something with mStatus info
-                textSat.setText(strGpsStats);
+                Log.d("Sat : ", "onGpsStatusChanged GPS_EVENT_FIRST_FIX");
+                //textSat.setText("onGpsStatusChanged GPS_EVENT_FIRST_FIX");
                 break;
-
             case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-                // Do Something with mStatus info
-                this.mStatus = this.lm.getGpsStatus(null);
-                Iterator<GpsSatellite> sats = this.mStatus.getSatellites().iterator();
+                Log.d("Sat : ", "onGpsStatusChanged GPS_EVENT_SATELLITE_STATUS");
                 strGpsStats = "Number: Prn,usedInFix(),Snr,Azimuth,Elevation\n";
-                int i = 0;
-                while (sats.hasNext()) {
-                    GpsSatellite satellite = sats.next();
-                    strGpsStats = (i++) + ": " + satellite.getPrn() + "," + satellite.usedInFix() + "," + satellite.getSnr() + "," + satellite.getAzimuth() + "," + satellite.getElevation() + "\n\n";
+                mStatus = lm.getGpsStatus(null);
+                if (mStatus != null) {
+                    Iterable<GpsSatellite> satellites = mStatus.getSatellites();
+                    Iterator<GpsSatellite> sat = satellites.iterator();
+                    int i = 0;
+                    while (sat.hasNext()) {
+                        GpsSatellite satellite = sat.next();
+                        if (satellite.usedInFix()) {
+
+                            strGpsStats += (i++) + ": " + satellite.getPrn() + "," + satellite.usedInFix() + "," + satellite.getSnr() + "," + satellite.getAzimuth() + "," + satellite.getElevation() + "\n";
+                        }
+                    }
+                    textSat.setText(strGpsStats);
                 }
-                //String satinfo = SatInfos();
-                textSat.setText(strGpsStats);
-                Log.d("Satellite", "Sat found");
+                break;
+            case GpsStatus.GPS_EVENT_STARTED:
+                Log.d("Sat : ", "onGpsStatusChanged GPS_EVENT_STARTED");
+                textSat.setText("onGpsStatusChanged GPS_EVENT_STARTED");
+                break;
+            case GpsStatus.GPS_EVENT_STOPPED:
+                Log.d("Sat : ", "onGpsStatusChanged GPS_EVENT_STOPPED");
                 break;
         }
     }

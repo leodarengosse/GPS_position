@@ -1,10 +1,10 @@
 package leodarengosse.gps_position;
 
 
-import android.content.DialogInterface;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -18,21 +18,11 @@ public class MainActivity extends AppCompatActivity {
 
     //Initialisation variables
     protected TextView textCoord, textSat;
-    /* private double latitude, longitude, altitude;
-     private float accuracy, bearing, speed;
-     private long time;*/
-    protected String msg, provider;
-    protected LocationManager lm;
-
-
-    private Button button_pause;
-
-
-    public Satellite satellite;
     private Position position;
-    private double lat;
-    private String sat;
+    private Button button_play;
     private Button button_stop;
+    private boolean button_stop_event;
+    private String s;
 
 
     @Override
@@ -50,34 +40,32 @@ public class MainActivity extends AppCompatActivity {
         position = new Position(getApplicationContext(), textCoord, textSat);
 
         button_stop = (Button) findViewById(R.id.button_stop);
-        //lm = position.locationManager;
-        OnClickListener oclbutton_stop = new OnClickListener() {
+
+        button_stop.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                // change text of the TextView (tvOut)
-                tvOut.setText("Button OK clicked");
+                position.stopUsingGPS();
+                button_stop_event = true;
+                /*ArrayList<Integer> SatList = position.getSatList();
+                s = format(valueOf(SatList.get(1)));
+                textCoord.setText(s);*/
+
 
             }
 
-            // assign click listener to the OK button (btnOK)
-            btnOk.setOnClickListener(oclBtnOk);
-        };
+        });
 
-        //lat = position.getLatitude();
-        //textCoord.setText(String.valueOf(lat));
-        //textCoord.append("provider"+ String.valueOf(position.getProvider()));
+        button_play = (Button) findViewById(R.id.button_play);
 
-/*
-        satellite = new Satellite(lm, textSat);
-        //sat = satellite.getstrGpsStats();
+        button_play.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                position = new Position(getApplicationContext(), textCoord, textSat);
+                button_stop_event = false;
 
-        lm.addGpsStatusListener(satellite);
-        textSat.setText("coucou");
-        //textSat.setText(String.valueOf(sat));
+            }
 
-        //lm.removeGpsStatusListener(satellite);*/
-
-
+        });
 
     }
 
@@ -90,6 +78,25 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         //mGoogleApiClient.disconnect();
         super.onStop();
+        position.stopUsingGPS();
+
+    }
+
+    protected void onPause() {
+        //mGoogleApiClient.disconnect();
+        super.onPause();
+        position.stopUsingGPS();
+
+    }
+
+
+    protected void onRestart() {
+        //mGoogleApiClient.connect();
+        super.onRestart();
+        if (!button_stop_event)
+        {
+            position = new Position(getApplicationContext(), textCoord, textSat);
+        }
     }
 
 }

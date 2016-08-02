@@ -16,6 +16,7 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
@@ -60,8 +61,12 @@ public class Position implements LocationListener, GpsStatus.Listener {
     private float accuracy;
     private TextView textCoord;
     public double lat_gps = 0.0, lat_wifi = 0.0;
-    private String strGpsStats;
     private TextView textSat;
+
+    private String strGpsStats;
+    private GpsStatus mStatus;
+
+    private ArrayList<Integer> SatList;
 
 
     public Position(Context context, TextView textCoord, TextView textSat) {
@@ -150,6 +155,7 @@ public class Position implements LocationListener, GpsStatus.Listener {
     public void stopUsingGPS() {
         if (locationManager != null) {
             locationManager.removeUpdates(Position.this);
+            //locationManager.removeGpsStatusListener (Position.this );
         }
     }
 
@@ -356,25 +362,12 @@ public class Position implements LocationListener, GpsStatus.Listener {
                 break;
             case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
                 Log.d("Sat : ", "onGpsStatusChanged GPS_EVENT_SATELLITE_STATUS");
-                strGpsStats = "Number: Prn,usedInFix(),Snr,Azimuth,Elevation\n";
-                GpsStatus gpsStatus = locationManager.getGpsStatus(null);
-                if(gpsStatus != null) {
-                    Iterable<GpsSatellite>satellites = gpsStatus.getSatellites();
-                    Iterator<GpsSatellite> sat = satellites.iterator();
-                    int i=0;
-                    while (sat.hasNext()) {
-                        GpsSatellite satellite = sat.next();
-                        if (satellite.usedInFix()) {
-
-                            strGpsStats += (i++) + ": " + satellite.getPrn() + "," + satellite.usedInFix() + "," + satellite.getSnr() + "," + satellite.getAzimuth() + "," + satellite.getElevation() + "\n";
-                        }
-                    }
-                    textSat.setText(strGpsStats);
-                }
+                SatInfos();
+                getSatUsedList();
+                getSatUsedCount();
                 break;
             case GpsStatus.GPS_EVENT_STARTED:
                 Log.d("Sat : ", "onGpsStatusChanged GPS_EVENT_STARTED");
-                textSat.setText("onGpsStatusChanged GPS_EVENT_STARTED");
                 break;
             case GpsStatus.GPS_EVENT_STOPPED:
                 Log.d("Sat : ", "onGpsStatusChanged GPS_EVENT_STOPPED");
@@ -382,6 +375,80 @@ public class Position implements LocationListener, GpsStatus.Listener {
         }
 
     }
+
+    public ArrayList<Integer> getSatUsedList() {
+        mStatus = locationManager.getGpsStatus(null);
+        if (mStatus != null) {
+            Iterator<GpsSatellite> sats = mStatus.getSatellites().iterator();
+            SatList = new ArrayList<>();
+            while (sats.hasNext()) {
+                GpsSatellite sat = sats.next();
+                if (sat.usedInFix()) {
+                    SatList.add(sat.getPrn());
+
+                }
+
+            }
+            return SatList;
+        }
+        return null;
+    }
+
+
+    public String SatInfos(){
+
+        strGpsStats = "Number: Prn,usedInFix(),Snr,Azimuth,Elevation\n";
+        mStatus = locationManager.getGpsStatus(null);
+        if(mStatus != null) {
+            Iterable<GpsSatellite>satellites = mStatus.getSatellites();
+            Iterator<GpsSatellite> sat = satellites.iterator();
+            int i=0;
+            while (sat.hasNext()) {
+                GpsSatellite satellite = sat.next();
+                if (satellite.usedInFix()) {
+
+                    strGpsStats += (i++) + ": " + satellite.getPrn() + "," + satellite.usedInFix() + "," + satellite.getSnr() + "," + satellite.getAzimuth() + "," + satellite.getElevation() + "\n";
+                }
+            }
+            textSat.setText(strGpsStats);
+        }
+
+        return strGpsStats;
+    };
+
+
+    public int getSatUsedCount() {
+        int satUsedCount = 0;
+        GpsStatus gpsStatus = locationManager.getGpsStatus(null);
+        if (gpsStatus != null) {
+            for (GpsSatellite sat : gpsStatus.getSatellites()) {
+                if (sat.usedInFix()) {
+                    satUsedCount++;
+                }
+            }
+        }
+        return satUsedCount;
+    }
+
+    /**
+     * Function to get str
+     */
+    public String getstrGpsStats() {
+
+        // return latitude
+        return this.strGpsStats;
+    }
+
+    /**
+     * Function to get str
+     */
+    public ArrayList<Integer> getSatList() {
+
+        // return latitude
+        return this.SatList;
+    }
+
+
 
 
 }
